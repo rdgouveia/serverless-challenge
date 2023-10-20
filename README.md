@@ -1,106 +1,115 @@
-<!--
-title: 'Serverless Framework Node Express API on AWS'
-description: 'This template demonstrates how to develop and deploy a simple Node Express API running on AWS Lambda using the traditional Serverless Framework.'
-layout: Doc
-framework: v3
-platform: AWS
-language: nodeJS
-priority: 1
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
+# Serverless-Challenge
 
-# Serverless Framework Node Express API on AWS
+## _A simple project challenge_
 
-This template demonstrates how to develop and deploy a simple Node Express API service running on AWS Lambda using the traditional Serverless Framework.
+On this project i built a serverless application to register, update, delete and consult a database of employees.
 
-## Anatomy of the template
+# Requirements
 
-This template configures a single function, `api`, which is responsible for handling all incoming requests thanks to the `httpApi` event. To learn more about `httpApi` event configuration options, please refer to [httpApi event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api/). As the event is configured in a way to accept all incoming requests, `express` framework is responsible for routing and handling requests internally. Implementation takes advantage of `serverless-http` package, which allows you to wrap existing `express` applications. To learn more about `serverless-http`, please refer to corresponding [GitHub repository](https://github.com/dougmoscrop/serverless-http).
+- NodeJS
+- AWS Account
+- Atlas Cluster
+- Serverless
 
-## Usage
+# Running project
 
-### Deployment
+- Clone the repo
+- Run **npm install -g serverless** to install serverless
+- Create the **.env** file using the **.env.example** as guide
+- Set your **AWS** credentials on project (if you dont know how to do that, go to the end of the documentation)
+- Run **yarn** or **npm i** to install the deps
 
-Install dependencies with:
+Now the project should be ready to run.
 
-```
-npm install
-```
+# Using _Serverless Offline_
 
-and then deploy with:
+Serverless Offline is a plugin to Serverless that allow you to run the project emulating AWS enviroment, with that you can test and see if your application is ready to be deployed.
 
-```
-serverless deploy
-```
+To use Serverless Offline you just need to:
 
-After running deploy, you should see output similar to:
+- Go to project folder
+- Make sure you have everything installed on the project and configured
+- Run **sls offline --stage dev** on your terminal
 
-```bash
-Deploying aws-node-express-api-project to stage dev (us-east-1)
+This should build the application and log the availables routes to be used. Now you can test the application.
 
-✔ Service deployed to stack aws-node-express-api-project-dev (196s)
+# Using tests
 
-endpoint: ANY - https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com
-functions:
-  api: aws-node-express-api-project-dev-api (766 kB)
-```
+If you want to use the tests, its pretty simple:
 
-_Note_: In current form, after deployment, your API is public and can be invoked by anyone. For production deployments, you might want to configure an authorizer. For details on how to do that, refer to [`httpApi` event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api/).
+- Go to project folder
+- Make sure you have everything installed on the project and configured
+- Run **yarn test** or **npm test**
 
-### Invocation
+Now the tests should running and, if everything is correct, that should pass all the tests.
 
-After successful deployment, you can call the created application via HTTP:
+# Deploying to AWS
 
-```bash
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/
-```
+If you want to deploy the application to AWS, you **need** your AWS credentials, without that you cannot deploy your application. If you did'nt configured you AWS credentials yet, see how to do that on the end of the documentation.
 
-Which should result in the following response:
+- Go to project folder
+- Make sure you have everything installed on the project and configured
+- Run **sls deploy --stage dev** (if you want to deploy to another stage, just change _dev_ to another one, eg. _prod_)
 
-```
-{"message":"Hello from root!"}
-```
+This should deploy your application and log your endpoint on AWS.
 
-Calling the `/hello` path with:
+# Routes
 
-```bash
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/hello
-```
+This project has just 5 routes available to be used.
 
-Should result in the following response:
+### Crate a new employee on database (POST - /employee/newEmployee)
 
-```bash
-{"message":"Hello from path!"}
+Its a route to create a new employee on database. You need to to send on the body of request something like this:
+
+```json
+{
+  "name": "Rafael A.",
+  "age": 22,
+  "role": "Boss"
+}
 ```
 
-If you try to invoke a path or method that does not have a configured handler, e.g. with:
+### Update a employee info on database (PATCH - /employee/updateEmployee/:id)
 
-```bash
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/nonexistent
+This route update a employee info on database, this is what you need to send on request:
+
+On path parameter you need to send the \_id of the employee, like this
+`/employee/updateEmployee/6531b07d759e919d089942f2`
+
+On body, you can send on or more of those infos. Its not required to send all:
+
+```json
+{
+  "name": "Rafael A.",
+  "age": 22,
+  "role": "Boss"
+}
 ```
 
-You should receive the following response:
+### Delete a employee from database (DELETE - /employee/deleteEmployee/:id)
 
-```bash
-{"error":"Not Found"}
-```
+This route delete a employee from database based on \_id that you pass on path parameter:
 
-### Local development
+On path parameter you need to send the \_id of the employee, like this
+`/employee/deleteEmployee/6531b07d759e919d089942f2`
 
-It is also possible to emulate API Gateway and Lambda locally by using `serverless-offline` plugin. In order to do that, execute the following command:
+### Return information about a specific employee (GET - /employee/getEmployee/:id)
 
-```bash
-serverless plugin install -n serverless-offline
-```
+This route return informations about a specific employee from database based on \_id that you pass on path parameter:
 
-It will add the `serverless-offline` plugin to `devDependencies` in `package.json` file as well as will add it to `plugins` in `serverless.yml`.
+On path parameter you need to send the \_id of the employee, like this
+`/employee/getEmployee/6531b07d759e919d089942f2`
 
-After installation, you can start local emulation with:
+### Return information of all employees (GET - /employee/getAllEmployees)
 
-```
-serverless offline
-```
+This route return information about all employees registed on database. This route has pagination, so you need to pass the page on query string parameters to navigate on the infos. Send something like this:
+`/employee/getAllEmployees?page=1` (the pagination init with 1)
 
-To learn more about the capabilities of `serverless-offline`, please refer to its [GitHub repository](https://github.com/dherault/serverless-offline).
+# Setting up your AWS credentials on project
+
+To set your AWS credentials to the project:
+
+- Go to project folder
+- Run **sls config credentials --provider aws --key _YOUR_KEY_ --secret _YOUR_SECRET_**
+
+You can see a tutorial to get your AWS credentials [here](https://docs.aws.amazon.com/keyspaces/latest/devguide/access.credentials.html)

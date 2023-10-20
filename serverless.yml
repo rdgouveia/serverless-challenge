@@ -1,12 +1,53 @@
 service: serverless-challenge
-frameworkVersion: '3'
+frameworkVersion: "3"
+useDotenv: true
+
+plugins:
+  - serverless-offline
 
 provider:
   name: aws
   runtime: nodejs18.x
+  memorySize: 128
+  timeout: 30
+  stage: ${opt:stage}
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL}
 
 functions:
-  api:
-    handler: index.handler
+  health:
+    handler: index.healthCheck
     events:
-      - httpApi: '*'
+      - http:
+          path: /
+          method: GET
+  getEmployee:
+    handler: index.getEmployee
+    events:
+      - http:
+          path: /employee/getEmployee/{id}
+          method: GET
+  getAllEmployee:
+    handler: index.getAllEmployees
+    events:
+      - http:
+          path: /employee/getAllEmployees
+          method: GET
+  newEmployee:
+    handler: index.newEmployee
+    events:
+      - http:
+          path: /employee/newEmployee
+          method: POST
+  updateEmployee:
+    handler: index.updateEmployee
+    events:
+      - http:
+          path: /employee/updateEmployee/{id}
+          method: PATCH
+  deleteEmployee:
+    handler: index.deleteEmployee
+    events:
+      - http:
+          path: /employee/deleteEmployee/{id}
+          method: DELETE
